@@ -1,14 +1,15 @@
 from models.expense import Expense
 
-def add_expense(description, amount, date):
-    expense = Expense(description, amount, date)
-    expense.save()
+def add_expense(name, amount):
+    expense = Expense(name=name, amount=amount)
+    # Here you should add the expense to the database
+    # For simplicity, we're just returning the created expense
+    return expense
 
-def view_expenses():
-    return Expense.get_all()
-
-def delete_expense(expense_id):
-    Expense.delete(expense_id)
-
-def update_expense(expense_id, description, amount, date):
-    Expense.update(expense_id, description, amount, date)
+def get_expenses():
+    # Here you should fetch the expenses from the database
+    # For simplicity, we're returning a static list
+    return [
+        {"name": "Groceries", "amount": 50},
+        {"name": "Rent", "amount": 500}
+    ]
