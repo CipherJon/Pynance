@@ -17,13 +17,20 @@ def api_add_expense():
     data = request.json
     name = data['name']
     amount = data['amount']
-    expense = add_expense(name, amount)
-    return jsonify(expense), 201
+    category = data.get('category', 'Uncategorized')  # Optional category with default
+    expense = add_expense(name, amount, category)
+    # Convert Expense object to a dictionary
+    expense_dict = {
+        'name': expense.name,
+        'amount': expense.amount,
+        'category': expense.category
+    }
+    return jsonify(expense_dict), 201
 
 @app.route('/api/expenses', methods=['GET'])
 def api_get_expenses():
     expenses = get_expenses()
-    return jsonify(expenses)
+    return jsonify(expenses)  # Already returns a list of dicts, no change needed
 
 if __name__ == '__main__':
     app.run(debug=True)

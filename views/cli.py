@@ -1,7 +1,9 @@
-from services.expense_service import add_expense, view_expenses, delete_expense, update_expense
+from services.expense_service import add_expense, get_expenses
+from models.expense import Expense
 from utils.helpers import format_currency
 
 def main_menu():
+    Expense.create_table()
     while True:
         print("\nExpense Tracker")
         print("1. Add Expense")
@@ -15,14 +17,14 @@ def main_menu():
         if choice == '1':
             description = input("Enter description: ")
             amount = float(input("Enter amount: "))
-            date = input("Enter date (YYYY-MM-DD): ")
-            add_expense(description, amount, date)
+            category = input("Enter category (optional): ")
+            add_expense(description, amount, category)
             print("Expense added successfully.")
         elif choice == '2':
             expenses = view_expenses()
             print("\nExpenses:")
             for expense in expenses:
-                print(f"ID: {expense[0]}, Description: {expense[1]}, Amount: {format_currency(expense[2])}, Date: {expense[3]}")
+                print(f"ID: {expense[0]}, Description: {expense[1]}, Amount: {format_currency(expense[2])}, Category: {expense[3]}")
         elif choice == '3':
             expense_id = int(input("Enter expense ID to delete: "))
             delete_expense(expense_id)
