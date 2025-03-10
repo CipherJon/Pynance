@@ -1,3 +1,6 @@
 flask
 pytest
-# Add any other dependencies here
+sqlalchemy
+python-dotenv
+python-dateutil
+marshmallow

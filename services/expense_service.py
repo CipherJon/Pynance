@@ -33,10 +33,25 @@ def add_expense(name, amount, category='Uncategorized'):
     conn.close()
     return expense
 
+def delete_expense(expense_id):
+    try:
+        conn = sqlite3.connect('data/database.db')
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM expenses WHERE id = ?', (expense_id,))
+        conn.commit()
+        deleted = cursor.rowcount > 0
+        return deleted
+    except sqlite3.Error as e:
+        print(f"Database error during deletion: {e}")
+        return False
+    finally:
+        if conn:
+            conn.close()
+
 def get_expenses():
     conn = sqlite3.connect('data/database.db')
     cursor = conn.cursor()
-    cursor.execute('SELECT name, amount, category FROM expenses')
-    expenses = [{"name": row[0], "amount": row[1], "category": row[2]} for row in cursor.fetchall()]
+    cursor.execute('SELECT id, name, amount, category FROM expenses')
+    expenses = [{"id": row[0], "name": row[1], "amount": row[2], "category": row[3]} for row in cursor.fetchall()]
     conn.close()
     return expenses
