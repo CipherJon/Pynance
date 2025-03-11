@@ -116,7 +116,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 body: JSON.stringify({
                     name: nameInput.value,
                     amount: parseFloat(amountInput.value),
-                    category: categorySelect.value
+                    category: categorySelect.value,
+                    date: document.getElementById('expense-date').value
                 })
             });
 
@@ -131,16 +132,107 @@ document.addEventListener('DOMContentLoaded', async () => {
             categorySelect.value = 'Food';
 
         } catch (error) {
-            errorMessage.textContent = `Error submitting expense: ${error.message}`;
+            const errorText = await response.text();
+            errorMessage.textContent = `Error submitting expense: ${errorText}`;
         }
     });
 
     // Delete expense handler with chart update
     document.getElementById('expense-list').addEventListener('click', async (event) => {
+        const row = event.target.closest('tr');
+        const id = row?.dataset.expenseId;
+        
         if (event.target.classList.contains('delete-btn')) {
-            const id = event.target.closest('tr').dataset.expenseId;
             await deleteExpense(id);
             await updateCharts();
+        }
+        else if (event.target.classList.contains('edit-btn')) {
+            const cells = row.querySelectorAll('.editable');
+            const originalValues = {};
+            
+            // Toggle edit mode
+            cells.forEach(cell => {
+                const field = cell.dataset.field;
+                const value = field === 'date'
+                    ? new Date(cell.textContent).toISOString().split('T')[0]
+                    : field === 'amount'
+                    ? parseFloat(cell.textContent.replace('$', '')).toFixed(2)
+                    : cell.textContent;
+                
+                originalValues[field] = value;
+                if (field === 'category') {
+                    cell.innerHTML = `
+                        <select class="form-control form-control-sm">
+                            <option value="food" ${value === 'food' ? 'selected' : ''}>Food</option>
+                            <option value="transportation" ${value === 'transportation' ? 'selected' : ''}>Transportation</option>
+                            <option value="housing" ${value === 'housing' ? 'selected' : ''}>Housing</option>
+                            <option value="entertainment" ${value === 'entertainment' ? 'selected' : ''}>Entertainment</option>
+                            <option value="other" ${value === 'other' ? 'selected' : ''}>Other</option>
+                        </select>`;
+                } else {
+                    cell.innerHTML = `<input class="form-control form-control-sm"
+                        type="${field === 'date' ? 'date' : field === 'amount' ? 'number' : 'text'}"
+                        value="${value}">`;
+                }
+            });
+            
+            // Change button to save
+            event.target.textContent = 'Save';
+            event.target.classList.replace('btn-primary', 'btn-success');
+            event.target.classList.add('save-btn');
+            event.target.classList.remove('edit-btn');
+            
+            // Handle save action
+            const saveHandler = async () => {
+                try {
+                    const updates = {};
+                    cells.forEach((cell, index) => {
+                        const field = cell.dataset.field;
+                        const input = cell.querySelector('input');
+                        const select = cell.querySelector('select');
+                        const newValue = (select ? select.value : input.value).trim();
+                        
+                        if (newValue !== originalValues[field]) {
+                            updates[field] = field === 'amount' ? parseFloat(newValue) : newValue;
+                        }
+                    });
+                    
+                    if (Object.keys(updates).length > 0) {
+                        const response = await fetch(`/api/expenses/${id}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(updates)
+                        });
+                        
+                        const updatedExpense = await response.json();
+                        // Update the row with new data
+                        // Update the row with server response and restore view mode
+                        cells.forEach(cell => {
+                            const field = cell.dataset.field;
+                            const value = updatedExpense[field];
+                            originalValues[field] = value; // Update original values
+                            cell.textContent = field === 'date'
+                                ? new Date(value).toLocaleDateString()
+                                : field === 'amount'
+                                ? `$${parseFloat(value).toFixed(2)}`
+                                : value;
+                        });
+                        await updateCharts();
+                    }
+                    
+                } catch (error) {
+                    document.getElementById('error-message').textContent = `Error saving changes: ${error.message}`;
+                } finally {
+                    // Restore button state
+                    event.target.textContent = 'Edit';
+                    event.target.classList.replace('btn-success', 'btn-primary');
+                    event.target.classList.remove('save-btn');
+                    event.target.classList.add('edit-btn');
+                    event.target.removeEventListener('click', saveHandler);
+                }
+            };
+            
+            event.target.addEventListener('click', saveHandler);
         }
     });
 });
@@ -151,11 +243,12 @@ function addExpenseToTable(expense) {
     row.dataset.expenseId = expense.id;
     
     row.innerHTML = `
-        <td>${expense.name}</td>
-        <td>$${expense.amount.toFixed(2)}</td>
-        <td>${expense.category}</td>
-        <td>${new Date(expense.date || Date.now()).toLocaleDateString()}</td>
+        <td class="editable" data-field="name">${expense.name}</td>
+        <td class="editable" data-field="amount">$${expense.amount.toFixed(2)}</td>
+        <td class="editable" data-field="category">${expense.category}</td>
+        <td class="editable" data-field="date">${new Date(expense.date || Date.now()).toLocaleDateString()}</td>
         <td>
+            <button class="btn btn-primary btn-sm edit-btn">Edit</button>
             <button class="btn btn-danger btn-sm delete-btn">Delete</button>
         </td>
     `;

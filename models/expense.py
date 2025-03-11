@@ -1,13 +1,21 @@
 import sqlite3
 from datetime import datetime
+from enum import Enum
 from config.config import DATABASE_PATH
 
+class Category(str, Enum):
+    FOOD = "food"
+    TRANSPORTATION = "transportation"
+    HOUSING = "housing"
+    ENTERTAINMENT = "entertainment"
+    OTHER = "other"
+
 class Expense:
-    def __init__(self, name, amount, category='Uncategorized', date=None):
+    def __init__(self, name, amount, category: Category = Category.OTHER, date=None):
         self.name = name
         self.amount = amount
         self.category = category
-        self.date = date or datetime.today().strftime('%Y-%m-%d')
+        self.date = date or datetime.utcnow().strftime('%Y-%m-%d')
 
     def to_dict(self):
         return {
@@ -42,7 +50,7 @@ class Expense:
                     id INTEGER PRIMARY KEY,
                     name TEXT NOT NULL,
                     amount REAL NOT NULL,
-                    category TEXT NOT NULL DEFAULT 'Uncategorized',
+                    category TEXT NOT NULL DEFAULT 'other' CHECK(category IN ('food', 'transportation', 'housing', 'entertainment', 'other')),
                     date DATE NOT NULL DEFAULT CURRENT_DATE
                 )
             ''')
