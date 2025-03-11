@@ -1,3 +1,5 @@
+"""Main Execution block"""
+
 from flask import Flask, request, send_from_directory, jsonify
 import os
 from services.expense_service import add_expense, delete_expense, get_expenses
