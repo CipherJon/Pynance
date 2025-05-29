@@ -1,89 +1,111 @@
-# Expense Tracker
+# PyBudget - Personal Budget Management System
 
-A comprehensive expense tracking application with both command-line interface (CLI) and web interface for managing personal finances, budgets, and generating detailed reports.
+A Flask-based web application for managing personal expenses and tracking budgets.
 
 ## Features
 
-### Core Functionality
-- Add, view, edit, and delete expenses with descriptions, amounts, categories, and dates
-- Income tracking and categorization
-- Transaction history with filtering and sorting
+- Add, update, and delete expenses
+- Categorize expenses
+- Track spending over time
+- RESTful API endpoints
+- Input validation and error handling
+- Rate limiting and security measures
+- CORS support for frontend integration
 
-### Budget Management
-- Create and manage multiple budgets
-- Set monthly budget limits per category
-- Real-time budget progress tracking
-- Alerts when approaching budget limits
+## Prerequisites
 
-### Reporting & Analytics
-- Generate detailed financial reports (daily, weekly, monthly)
-- Visualize spending patterns with charts and graphs
-- Export reports to CSV/PDF formats
-- Year-over-year spending comparisons
-
-### Data Management
-- Secure SQLite database storage
-- Data import/export functionality
-- Multi-user support with individual profiles
-- Cloud sync capabilities (optional)
-
-### Interface Options
-- Intuitive command-line interface (CLI)
-- Responsive web interface with dashboard
-- Dark/Light theme support
-- Mobile-friendly design
-
-## Requirements
-
-- Python 3.10+
-- SQLite 3.32+
-- Modern web browser (for web interface)
-- Node.js v18+ (optional for frontend development)
+- Python 3.8 or higher
+- pip (Python package manager)
 
 ## Installation
 
-### CLI Application
 1. Clone the repository:
-    ```sh
-    git clone https://github.com/yourusername/expense_tracker.git
-    ```
-2. Navigate to the project directory:
-    ```sh
-    cd expense_tracker
-    ```
-3. Install Python dependencies:
-    ```sh
-    pip install -r requirements.txt
-    ```
+```bash
+git clone https://github.com/yourusername/PyBudget.git
+cd PyBudget
+```
 
-### Web Interface
-1. Ensure you have a modern web browser (Chrome, Firefox, or Edge)
-2. Open `frontend/index.html` in your browser
-3. (Optional) For local development:
-    ```sh
-    cd frontend
-    npm install  # If package.json exists
-    ```
+2. Create and activate a virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
 
-## Usage
+3. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
 
-### Command-Line Interface
-```sh
+## Running the Application
+
+1. Start the Flask development server:
+```bash
 python main.py
 ```
-- Follow the interactive menu to manage expenses and budgets
-- Example commands:
-  - Add expense: `add "Groceries" 75.50 Food`
-  - Generate report: `report monthly 2023-10`
 
-### Web Interface
-1. Launch the web interface by opening `frontend/index.html`
-2. Use the dashboard to:
-   - View financial overview
-   - Add/edit transactions
-   - Configure budget limits
-   - Generate interactive reports
+2. Access the application at `http://localhost:5000`
+
+## API Endpoints
+
+### GET /api/expenses
+- Returns a list of all expenses
+- Rate limit: 30 requests per minute
+
+### POST /api/expenses
+- Creates a new expense
+- Required fields: name, amount
+- Optional fields: category
+- Rate limit: 10 requests per minute
+
+### PUT /api/expenses/<id>
+- Updates an existing expense
+- Optional fields: name, amount, category, date
+- Rate limit: 10 requests per minute
+
+### DELETE /api/expenses/<id>
+- Deletes an expense
+- Rate limit: 10 requests per minute
+
+## Testing
+
+Run the test suite:
+```bash
+pytest
+```
+
+## Project Structure
+
+```
+PyBudget/
+├── config/             # Configuration files
+├── data/              # Database files
+├── frontend/          # Frontend static files
+├── models/            # Data models
+├── services/          # Business logic
+├── tests/             # Test files
+├── utils/             # Utility functions
+├── views/             # View templates
+├── main.py           # Application entry point
+├── requirements.txt   # Project dependencies
+└── README.md         # Project documentation
+```
+
+## Security Features
+
+- Input validation for all user inputs
+- Rate limiting to prevent abuse
+- CORS configuration for frontend security
+- SQL injection prevention through parameterized queries
+- Error handling and logging
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.

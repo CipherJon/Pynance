@@ -3,50 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PyBudget Tracker</title>
+    <title>PyBudget - Personal Finance Tracker</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="app">
-        <h1>Budget Tracker</h1>
-        <div id="expense-form">
-            <input type="text" id="expense-name" placeholder="Expense Name" required>
-            <input type="number" id="expense-amount" placeholder="Amount" step="0.01" required>
-            <input type="date" id="expense-date" class="form-control" value="${new Date().toISOString().split('T')[0]}">
-            <select id="expense-category">
-                <option value="food">Food</option>
-                <option value="transportation">Transportation</option>
-                <option value="housing">Housing</option>
-                <option value="entertainment">Entertainment</option>
-                <option value="other">Other</option>
-            </select>
-            <button id="add-expense">Add Expense</button>
-            <div id="error-message" class="error"></div>
-        </div>
-        
-        <div class="charts-container">
-            <div class="chart-wrapper">
-                <canvas id="categoryChart"></canvas>
+    <div class="container">
+        <!-- Auth Section -->
+        <div id="auth-section" class="section">
+            <h2>Authentication</h2>
+            <div id="auth-message" class="message"></div>
+            <div id="login-form" class="form-container">
+                <h3>Login</h3>
+                <form id="login">
+                    <div class="form-group">
+                        <label for="login-username">Username</label>
+                        <input type="text" id="login-username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" required>
+                    </div>
+                    <button type="submit" class="btn">Login</button>
+                </form>
             </div>
-            <div class="chart-wrapper">
-                <canvas id="monthlySpendingChart"></canvas>
+            <div id="register-form" class="form-container">
+                <h3>Register</h3>
+                <form id="register">
+                    <div class="form-group">
+                        <label for="register-username">Username</label>
+                        <input type="text" id="register-username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">Email</label>
+                        <input type="email" id="register-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Password</label>
+                        <input type="password" id="register-password" required>
+                    </div>
+                    <button type="submit" class="btn">Register</button>
+                </form>
             </div>
         </div>
 
-        <table id="expense-table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Amount</th>
-                    <th>Category</th>
-                    <th>Date</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="expense-list">
-            </tbody>
-        </table>
+        <!-- Main App Section (Hidden until authenticated) -->
+        <div id="app-section" class="section hidden">
+            <div class="header">
+                <h1>PyBudget</h1>
+                <button id="logout-btn" class="btn btn-secondary">Logout</button>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="loading-spinner" class="spinner hidden">
+                <div class="spinner-inner"></div>
+            </div>
+
+            <!-- Error Message -->
+            <div id="error-message" class="message error hidden"></div>
+
+            <!-- Success Message -->
+            <div id="success-message" class="message success hidden"></div>
+
+            <!-- Add Expense Form -->
+            <div class="form-container">
+                <h2>Add New Expense</h2>
+                <form id="expense-form">
+                    <div class="form-group">
+                        <label for="expense-name">Name</label>
+                        <input type="text" id="expense-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="expense-amount">Amount</label>
+                        <input type="number" id="expense-amount" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="expense-category">Category</label>
+                        <select id="expense-category" required>
+                            <option value="Food">Food</option>
+                            <option value="Transportation">Transportation</option>
+                            <option value="Housing">Housing</option>
+                            <option value="Entertainment">Entertainment</option>
+                            <option value="Utilities">Utilities</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="expense-date">Date</label>
+                        <input type="date" id="expense-date" required>
+                    </div>
+                    <button type="submit" class="btn">Add Expense</button>
+                </form>
+            </div>
+
+            <!-- Expenses List -->
+            <div class="expenses-container">
+                <h2>Your Expenses</h2>
+                <div class="filters">
+                    <input type="text" id="search-expenses" placeholder="Search expenses...">
+                    <select id="filter-category">
+                        <option value="">All Categories</option>
+                        <option value="Food">Food</option>
+                        <option value="Transportation">Transportation</option>
+                        <option value="Housing">Housing</option>
+                        <option value="Entertainment">Entertainment</option>
+                        <option value="Utilities">Utilities</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div id="expenses-list"></div>
+            </div>
+
+            <!-- Summary Section -->
+            <div class="summary-container">
+                <h2>Summary</h2>
+                <div id="summary-content"></div>
+            </div>
+        </div>
     </div>
     <script src="app.js"></script>
 </body>

@@ -1,272 +1,288 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    let categoryChart, monthlySpendingChart;
-    
-    // Initialize charts
-    const initCharts = async () => {
-        // Destroy existing charts if they exist
-        if (categoryChart) categoryChart.destroy();
-        if (monthlySpendingChart) monthlySpendingChart.destroy();
-        
-        // Fetch data for charts
-        const response = await fetch('/api/expenses');
-        const expenses = await response.json();
-        
-        // Process data for charts
-        const categoryData = processCategoryData(expenses);
-        const monthlyData = processMonthlyData(expenses);
-        
-        // Category pie chart
-        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
-        categoryChart = new Chart(categoryCtx, {
-            type: 'pie',
-            data: {
-                labels: categoryData.labels,
-                datasets: [{
-                    data: categoryData.amounts,
-                    backgroundColor: [
-                        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'
-                    ]
-                }]
-            }
+// API Configuration
+const API_URL = 'http://localhost:5000/api';
+let accessToken = localStorage.getItem('accessToken');
+let refreshToken = localStorage.getItem('refreshToken');
+
+// DOM Elements
+const authSection = document.getElementById('auth-section');
+const appSection = document.getElementById('app-section');
+const loadingSpinner = document.getElementById('loading-spinner');
+const errorMessage = document.getElementById('error-message');
+const successMessage = document.getElementById('success-message');
+const authMessage = document.getElementById('auth-message');
+
+// Authentication Functions
+async function register(username, email, password) {
+    try {
+        showLoading();
+        const response = await fetch(`${API_URL}/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, email, password })
         });
         
-        // Monthly spending line chart
-        const monthlyCtx = document.getElementById('monthlySpendingChart').getContext('2d');
-        monthlySpendingChart = new Chart(monthlyCtx, {
-            type: 'line',
-            data: {
-                labels: monthlyData.labels,
-                datasets: [{
-                    label: 'Monthly Spending',
-                    data: monthlyData.amounts,
-                    borderColor: '#36A2EB',
-                    tension: 0.1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    };
-    
-    // Process category data
-    const processCategoryData = (expenses) => {
-        const categories = {};
-        expenses.forEach(expense => {
-            categories[expense.category] = (categories[expense.category] || 0) + expense.amount;
-        });
+        const data = await response.json();
         
-        return {
-            labels: Object.keys(categories),
-            amounts: Object.values(categories)
-        };
-    };
-    
-    // Process monthly data
-    const processMonthlyData = (expenses) => {
-        const monthly = {};
-        expenses.forEach(expense => {
-            const date = new Date(expense.date || new Date());
-            const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-            monthly[monthYear] = (monthly[monthYear] || 0) + expense.amount;
-        });
+        if (!response.ok) {
+            throw new Error(data.message || 'Registration failed');
+        }
         
-        const sortedMonths = Object.keys(monthly).sort();
-        return {
-            labels: sortedMonths,
-            amounts: sortedMonths.map(month => monthly[month])
-        };
-    };
-    
-    // Update charts when expenses change
-    const updateCharts = async () => {
-        await initCharts();
-    };
-    
-    // Load existing expenses and initialize charts
-    const initialResponse = await fetch('/api/expenses');
-    if (initialResponse.ok) {
-        const expenses = await initialResponse.json();
-        expenses.forEach(expense => addExpenseToTable(expense));
-        await initCharts();
+        handleAuthSuccess(data);
+        showSuccess('Registration successful!');
+    } catch (error) {
+        showError(error.message);
+    } finally {
+        hideLoading();
     }
-    
-    // Add expense handler with chart update
-    document.getElementById('add-expense').addEventListener('click', async () => {
-        const nameInput = document.getElementById('expense-name');
-        const amountInput = document.getElementById('expense-amount');
-        const categorySelect = document.getElementById('expense-category');
-        const errorMessage = document.getElementById('error-message');
+}
 
-        errorMessage.textContent = '';
-
-        if (!nameInput.value || !amountInput.value) {
-            errorMessage.textContent = 'Please fill in all required fields';
-            return;
-        }
-
-        try {
-            const response = await fetch('/api/expenses', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name: nameInput.value,
-                    amount: parseFloat(amountInput.value),
-                    category: categorySelect.value,
-                    date: document.getElementById('expense-date').value
-                })
-            });
-
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-            const expense = await response.json();
-            addExpenseToTable(expense);
-            await updateCharts();
-
-            nameInput.value = '';
-            amountInput.value = '';
-            categorySelect.value = 'Food';
-
-        } catch (error) {
-            const errorText = await response.text();
-            errorMessage.textContent = `Error submitting expense: ${errorText}`;
-        }
-    });
-
-    // Delete expense handler with chart update
-    document.getElementById('expense-list').addEventListener('click', async (event) => {
-        const row = event.target.closest('tr');
-        const id = row?.dataset.expenseId;
+async function login(username, password) {
+    try {
+        showLoading();
+        const response = await fetch(`${API_URL}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
         
-        if (event.target.classList.contains('delete-btn')) {
-            await deleteExpense(id);
-            await updateCharts();
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.message || 'Login failed');
         }
-        else if (event.target.classList.contains('edit-btn')) {
-            const cells = row.querySelectorAll('.editable');
-            const originalValues = {};
-            
-            // Toggle edit mode
-            cells.forEach(cell => {
-                const field = cell.dataset.field;
-                const value = field === 'date'
-                    ? new Date(cell.textContent).toISOString().split('T')[0]
-                    : field === 'amount'
-                    ? parseFloat(cell.textContent.replace('$', '')).toFixed(2)
-                    : cell.textContent;
-                
-                originalValues[field] = value;
-                if (field === 'category') {
-                    cell.innerHTML = `
-                        <select class="form-control form-control-sm">
-                            <option value="food" ${value === 'food' ? 'selected' : ''}>Food</option>
-                            <option value="transportation" ${value === 'transportation' ? 'selected' : ''}>Transportation</option>
-                            <option value="housing" ${value === 'housing' ? 'selected' : ''}>Housing</option>
-                            <option value="entertainment" ${value === 'entertainment' ? 'selected' : ''}>Entertainment</option>
-                            <option value="other" ${value === 'other' ? 'selected' : ''}>Other</option>
-                        </select>`;
-                } else {
-                    cell.innerHTML = `<input class="form-control form-control-sm"
-                        type="${field === 'date' ? 'date' : field === 'amount' ? 'number' : 'text'}"
-                        value="${value}">`;
-                }
-            });
-            
-            // Change button to save
-            event.target.textContent = 'Save';
-            event.target.classList.replace('btn-primary', 'btn-success');
-            event.target.classList.add('save-btn');
-            event.target.classList.remove('edit-btn');
-            
-            // Handle save action
-            const saveHandler = async () => {
-                try {
-                    const updates = {};
-                    cells.forEach((cell, index) => {
-                        const field = cell.dataset.field;
-                        const input = cell.querySelector('input');
-                        const select = cell.querySelector('select');
-                        const newValue = (select ? select.value : input.value).trim();
-                        
-                        if (newValue !== originalValues[field]) {
-                            updates[field] = field === 'amount' ? parseFloat(newValue) : newValue;
-                        }
-                    });
-                    
-                    if (Object.keys(updates).length > 0) {
-                        const response = await fetch(`/api/expenses/${id}`, {
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(updates)
-                        });
-                        
-                        const updatedExpense = await response.json();
-                        // Update the row with new data
-                        // Update the row with server response and restore view mode
-                        cells.forEach(cell => {
-                            const field = cell.dataset.field;
-                            const value = updatedExpense[field];
-                            originalValues[field] = value; // Update original values
-                            cell.textContent = field === 'date'
-                                ? new Date(value).toLocaleDateString()
-                                : field === 'amount'
-                                ? `$${parseFloat(value).toFixed(2)}`
-                                : value;
-                        });
-                        await updateCharts();
-                    }
-                    
-                } catch (error) {
-                    document.getElementById('error-message').textContent = `Error saving changes: ${error.message}`;
-                } finally {
-                    // Restore button state
-                    event.target.textContent = 'Edit';
-                    event.target.classList.replace('btn-success', 'btn-primary');
-                    event.target.classList.remove('save-btn');
-                    event.target.classList.add('edit-btn');
-                    event.target.removeEventListener('click', saveHandler);
-                }
-            };
-            
-            event.target.addEventListener('click', saveHandler);
-        }
-    });
-});
+        
+        handleAuthSuccess(data);
+        showSuccess('Login successful!');
+    } catch (error) {
+        showError(error.message);
+    } finally {
+        hideLoading();
+    }
+}
 
-function addExpenseToTable(expense) {
-    const tbody = document.getElementById('expense-list');
-    const row = document.createElement('tr');
-    row.dataset.expenseId = expense.id;
-    
-    row.innerHTML = `
-        <td class="editable" data-field="name">${expense.name}</td>
-        <td class="editable" data-field="amount">$${expense.amount.toFixed(2)}</td>
-        <td class="editable" data-field="category">${expense.category}</td>
-        <td class="editable" data-field="date">${new Date(expense.date || Date.now()).toLocaleDateString()}</td>
-        <td>
-            <button class="btn btn-primary btn-sm edit-btn">Edit</button>
-            <button class="btn btn-danger btn-sm delete-btn">Delete</button>
-        </td>
-    `;
-    
-    tbody.appendChild(row);
+function handleAuthSuccess(data) {
+    accessToken = data.access_token;
+    refreshToken = data.refresh_token;
+    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
+    showApp();
+}
+
+function logout() {
+    accessToken = null;
+    refreshToken = null;
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    showAuth();
+}
+
+// UI State Functions
+function showLoading() {
+    loadingSpinner.classList.remove('hidden');
+}
+
+function hideLoading() {
+    loadingSpinner.classList.add('hidden');
+}
+
+function showError(message) {
+    errorMessage.textContent = message;
+    errorMessage.classList.remove('hidden');
+    setTimeout(() => {
+        errorMessage.classList.add('hidden');
+    }, 5000);
+}
+
+function showSuccess(message) {
+    successMessage.textContent = message;
+    successMessage.classList.remove('hidden');
+    setTimeout(() => {
+        successMessage.classList.add('hidden');
+    }, 5000);
+}
+
+function showAuth() {
+    authSection.classList.remove('hidden');
+    appSection.classList.add('hidden');
+}
+
+function showApp() {
+    authSection.classList.add('hidden');
+    appSection.classList.remove('hidden');
+    loadExpenses();
+}
+
+// Expense Functions
+async function loadExpenses() {
+    try {
+        showLoading();
+        const response = await fetch(`${API_URL}/expenses`, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+        
+        if (!response.ok) {
+            if (response.status === 401) {
+                throw new Error('Session expired. Please login again.');
+            }
+            throw new Error('Failed to load expenses');
+        }
+        
+        const expenses = await response.json();
+        displayExpenses(expenses);
+    } catch (error) {
+        showError(error.message);
+        if (error.message.includes('Session expired')) {
+            logout();
+        }
+    } finally {
+        hideLoading();
+    }
+}
+
+async function addExpense(expenseData) {
+    try {
+        showLoading();
+        const response = await fetch(`${API_URL}/expenses`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            },
+            body: JSON.stringify(expenseData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to add expense');
+        }
+        
+        showSuccess('Expense added successfully!');
+        loadExpenses();
+        document.getElementById('expense-form').reset();
+    } catch (error) {
+        showError(error.message);
+    } finally {
+        hideLoading();
+    }
 }
 
 async function deleteExpense(id) {
     try {
-        const response = await fetch(`/api/expenses/${id}`, {
-            method: 'DELETE'
+        showLoading();
+        const response = await fetch(`${API_URL}/expenses/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
         });
-
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-        document.querySelector(`tr[data-expense-id="${id}"]`)?.remove();
+        
+        if (!response.ok) {
+            throw new Error('Failed to delete expense');
+        }
+        
+        showSuccess('Expense deleted successfully!');
+        loadExpenses();
     } catch (error) {
-        console.error('Error deleting expense:', error);
-        document.getElementById('error-message').textContent = `Error deleting expense: ${error.message}`;
+        showError(error.message);
+    } finally {
+        hideLoading();
     }
+}
+
+// Display Functions
+function displayExpenses(expenses) {
+    const expensesList = document.getElementById('expenses-list');
+    expensesList.innerHTML = '';
+    
+    expenses.forEach(expense => {
+        const expenseElement = document.createElement('div');
+        expenseElement.className = 'expense-item';
+        expenseElement.innerHTML = `
+            <div>
+                <h3>${expense.name}</h3>
+                <p>Category: ${expense.category}</p>
+                <p>Date: ${new Date(expense.date).toLocaleDateString()}</p>
+            </div>
+            <div>
+                <p class="amount">$${expense.amount.toFixed(2)}</p>
+                <button class="btn btn-secondary" onclick="deleteExpense(${expense.id})">Delete</button>
+            </div>
+        `;
+        expensesList.appendChild(expenseElement);
+    });
+    
+    updateSummary(expenses);
+}
+
+function updateSummary(expenses) {
+    const summaryContent = document.getElementById('summary-content');
+    const total = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+    const byCategory = expenses.reduce((acc, expense) => {
+        acc[expense.category] = (acc[expense.category] || 0) + expense.amount;
+        return acc;
+    }, {});
+    
+    summaryContent.innerHTML = `
+        <p>Total Expenses: $${total.toFixed(2)}</p>
+        <h3>By Category:</h3>
+        ${Object.entries(byCategory).map(([category, amount]) => `
+            <p>${category}: $${amount.toFixed(2)}</p>
+        `).join('')}
+    `;
+}
+
+// Event Listeners
+document.getElementById('register').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('register-username').value;
+    const email = document.getElementById('register-email').value;
+    const password = document.getElementById('register-password').value;
+    await register(username, email, password);
+});
+
+document.getElementById('login').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('login-username').value;
+    const password = document.getElementById('login-password').value;
+    await login(username, password);
+});
+
+document.getElementById('expense-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const expenseData = {
+        name: document.getElementById('expense-name').value,
+        amount: parseFloat(document.getElementById('expense-amount').value),
+        category: document.getElementById('expense-category').value,
+        date: document.getElementById('expense-date').value
+    };
+    await addExpense(expenseData);
+});
+
+document.getElementById('logout-btn').addEventListener('click', logout);
+
+// Search and Filter
+document.getElementById('search-expenses').addEventListener('input', (e) => {
+    const searchTerm = e.target.value.toLowerCase();
+    const expenses = document.querySelectorAll('.expense-item');
+    expenses.forEach(expense => {
+        const text = expense.textContent.toLowerCase();
+        expense.style.display = text.includes(searchTerm) ? '' : 'none';
+    });
+});
+
+document.getElementById('filter-category').addEventListener('change', (e) => {
+    const category = e.target.value;
+    const expenses = document.querySelectorAll('.expense-item');
+    expenses.forEach(expense => {
+        const expenseCategory = expense.querySelector('p').textContent.split(': ')[1];
+        expense.style.display = !category || expenseCategory === category ? '' : 'none';
+    });
+});
+
+// Initialize
+if (accessToken) {
+    showApp();
+} else {
+    showAuth();
 }

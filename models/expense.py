@@ -1,63 +1,30 @@
-import sqlite3
 from datetime import datetime
-from enum import Enum
-from config.config import DATABASE_PATH
+from config.migrations import db
 
-class Category(str, Enum):
-    FOOD = "food"
-    TRANSPORTATION = "transportation"
-    HOUSING = "housing"
-    ENTERTAINMENT = "entertainment"
-    OTHER = "other"
+class Expense(db.Model):
+    """Expense model for SQLAlchemy."""
+    __tablename__ = 'expenses'
 
-class Expense:
-    def __init__(self, name, amount, category: Category = Category.OTHER, date=None):
-        self.name = name
-        self.amount = amount
-        self.category = category
-        self.date = date or datetime.utcnow().strftime('%Y-%m-%d')
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    category = db.Column(db.String(50), default='Uncategorized')
+    date = db.Column(db.Date, nullable=False, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Add user relationship
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
     def to_dict(self):
+        """Convert model to dictionary."""
         return {
-            "name": self.name,
-            "amount": self.amount,
-            "category": self.category,
-            "date": self.date
+            'id': self.id,
+            'name': self.name,
+            'amount': self.amount,
+            'category': self.category,
+            'date': self.date.isoformat() if self.date else None,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+            'user_id': self.user_id
         }
-
-    # Database connection pool to reuse connections
-    _connection_pool = None
-
-    @classmethod
-    def _get_connection(cls):
-        """Get a database connection from the pool"""
-        if not cls._connection_pool:
-            cls._connection_pool = sqlite3.connect(DATABASE_PATH,
-                                                 check_same_thread=False,
-                                                 timeout=10)
-        return cls._connection_pool
-
-    @classmethod
-    def create_table(cls):
-        """Initialize database schema safely without data loss"""
-        try:
-            conn = cls._get_connection()
-            cursor = conn.cursor()
-            
-            # Create table if not exists
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS expenses (
-                    id INTEGER PRIMARY KEY,
-                    name TEXT NOT NULL,
-                    amount REAL NOT NULL,
-                    category TEXT NOT NULL DEFAULT 'other' CHECK(category IN ('food', 'transportation', 'housing', 'entertainment', 'other')),
-                    date DATE NOT NULL DEFAULT CURRENT_DATE
-                )
-            ''')
-            conn.commit()
-        except sqlite3.Error as e:
-            print(f"Database error: {str(e)}")
-            conn.rollback()
-        finally:
-            if cursor:
-                cursor.close()

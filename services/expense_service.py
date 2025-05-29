@@ -1,117 +1,163 @@
-import sqlite3
-from models.expense import Expense
+import logging
+from typing import List, Dict, Optional, Any, Tuple
+from config.database import get_db_connection
+from utils.validators import validate_expense_data, ValidationError
 
-def add_expense(name, amount, category='Uncategorized'):
-    # Connect to the database
-    conn = sqlite3.connect('data/database.db')
-    cursor = conn.cursor()
+logger = logging.getLogger(__name__)
 
-    # Create the expenses table if it doesn't exist
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS expenses (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            amount REAL NOT NULL,
-            category TEXT DEFAULT 'Uncategorized',
-            date DATE NOT NULL DEFAULT CURRENT_DATE
-        )
-    ''')
-
-    # Check if the category column exists, add it if not
-    cursor.execute("PRAGMA table_info(expenses)")
-    columns = [col[1] for col in cursor.fetchall()]
-    if 'category' not in columns:
-        cursor.execute('ALTER TABLE expenses ADD COLUMN category TEXT DEFAULT "Uncategorized"')
-    if 'date' not in columns:
-        cursor.execute('ALTER TABLE expenses ADD COLUMN date DATE DEFAULT CURRENT_DATE')
-
-    # Insert the expense
-    expense = Expense(name=name, amount=amount, category=category)
-    cursor.execute('''
-        INSERT INTO expenses (name, amount, category, date)
-        VALUES (?, ?, ?, ?)
-    ''', (expense.name, expense.amount, expense.category, expense.date))
-    
-    expense_id = cursor.lastrowid
-    cursor.execute('SELECT id, name, amount, category, date FROM expenses WHERE id = ?', (expense_id,))
-    row = cursor.fetchone()
-    conn.commit()
-    conn.close()
-    return {
-        "id": row[0],
-        "name": row[1],
-        "amount": row[2],
-        "category": row[3],
-        "date": row[4]
-    }
-
-def delete_expense(expense_id):
+def add_expense(name: str, amount: float, category: str = 'Uncategorized') -> Dict[str, Any]:
+    """Add a new expense to the database."""
     try:
-        conn = sqlite3.connect('data/database.db')
-        cursor = conn.cursor()
-        cursor.execute('DELETE FROM expenses WHERE id = ?', (expense_id,))
-        conn.commit()
-        deleted = cursor.rowcount > 0
-        return deleted
-    except sqlite3.Error as e:
-        print(f"Database error during deletion: {e}")
-        return False
-    finally:
-        if conn:
-            conn.close()
-
-def get_expenses():
-    conn = sqlite3.connect('data/database.db')
-    cursor = conn.cursor()
-    cursor.execute('SELECT id, name, amount, category, date FROM expenses')
-    expenses = [{"id": row[0], "name": row[1], "amount": row[2], "category": row[3], "date": row[4]} for row in cursor.fetchall()]
-    conn.close()
-    return expenses
-
-def update_expense(expense_id, name=None, amount=None, category=None, date=None):
-    try:
-        conn = sqlite3.connect('data/database.db')
-        cursor = conn.cursor()
+        # Validate input data
+        data = validate_expense_data({
+            'name': name,
+            'amount': amount,
+            'category': category
+        })
         
-        updates = []
-        params = []
-        
-        if name is not None:
-            updates.append("name = ?")
-            params.append(name)
-        if amount is not None:
-            updates.append("amount = ?")
-            params.append(float(amount))
-        if category is not None:
-            if category.lower() not in {'food', 'transportation', 'housing', 'entertainment', 'other'}:
-                raise ValueError(f"Invalid category: {category}. Must be one of: food, transportation, housing, entertainment, other")
-            updates.append("category = ?")
-            params.append(category.lower())
-        if date is not None:
-            updates.append("date = ?")
-            params.append(date)
-        
-        if not updates:
-            return False  # No fields to update
-        
-        params.append(expense_id)
-        query = f"UPDATE expenses SET {', '.join(updates)} WHERE id = ?"
-        cursor.execute(query, params)
-        conn.commit()
-        if cursor.rowcount > 0:
-            cursor.execute('SELECT id, name, amount, category, date FROM expenses WHERE id = ?', (expense_id,))
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO expenses (name, amount, category, date)
+                VALUES (?, ?, ?, ?)
+            ''', (data['name'], data['amount'], data['category'], data['date']))
+            
+            expense_id = cursor.lastrowid
+            conn.commit()
+            
+            # Fetch and return the created expense
+            cursor.execute('SELECT * FROM expenses WHERE id = ?', (expense_id,))
             row = cursor.fetchone()
-            return {
-                "id": row[0],
-                "name": row[1],
-                "amount": row[2],
-                "category": row[3],
-                "date": row[4]
-            }
-        return None
-    except sqlite3.Error as e:
-        print(f"Database error during update: {e}")
-        return False
-    finally:
-        if conn:
-            conn.close()
+            return dict(row)
+            
+    except ValidationError as e:
+        logger.error(f"Validation error: {e}")
+        raise
+    except Exception as e:
+        logger.error(f"Error adding expense: {e}")
+        raise
+
+def delete_expense(expense_id: int) -> bool:
+    """Delete an expense from the database."""
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('DELETE FROM expenses WHERE id = ?', (expense_id,))
+            deleted = cursor.rowcount > 0
+            conn.commit()
+            return deleted
+    except Exception as e:
+        logger.error(f"Error deleting expense: {e}")
+        raise
+
+def get_expenses(
+    page: int = 1,
+    per_page: int = 10,
+    category: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    min_amount: Optional[float] = None,
+    max_amount: Optional[float] = None,
+    search: Optional[str] = None
+) -> Tuple[List[Dict[str, Any]], int]:
+    """Get expenses with pagination and filtering."""
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Build query conditions
+            conditions = []
+            params = []
+            
+            if category:
+                conditions.append("category = ?")
+                params.append(category.lower())
+            
+            if start_date:
+                conditions.append("date >= ?")
+                params.append(start_date)
+            
+            if end_date:
+                conditions.append("date <= ?")
+                params.append(end_date)
+            
+            if min_amount is not None:
+                conditions.append("amount >= ?")
+                params.append(min_amount)
+            
+            if max_amount is not None:
+                conditions.append("amount <= ?")
+                params.append(max_amount)
+            
+            if search:
+                conditions.append("(name LIKE ? OR category LIKE ?)")
+                search_term = f"%{search}%"
+                params.extend([search_term, search_term])
+            
+            # Build the query
+            where_clause = " AND ".join(conditions) if conditions else "1=1"
+            query = f"SELECT * FROM expenses WHERE {where_clause} ORDER BY date DESC"
+            
+            # Get total count
+            count_query = f"SELECT COUNT(*) FROM expenses WHERE {where_clause}"
+            cursor.execute(count_query, params)
+            total_count = cursor.fetchone()[0]
+            
+            # Add pagination
+            query += " LIMIT ? OFFSET ?"
+            params.extend([per_page, (page - 1) * per_page])
+            
+            # Execute query
+            cursor.execute(query, params)
+            expenses = [dict(row) for row in cursor.fetchall()]
+            
+            return expenses, total_count
+            
+    except Exception as e:
+        logger.error(f"Error fetching expenses: {e}")
+        raise
+
+def update_expense(expense_id: int, **kwargs) -> Optional[Dict[str, Any]]:
+    """Update an existing expense in the database."""
+    try:
+        # Validate update data
+        data = validate_expense_data(kwargs)
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Build update query dynamically based on provided fields
+            updates = []
+            params = []
+            for key, value in data.items():
+                updates.append(f"{key} = ?")
+                params.append(value)
+            
+            if not updates:
+                return None
+            
+            # Add updated_at timestamp
+            updates.append("updated_at = CURRENT_TIMESTAMP")
+            
+            # Add expense_id to params
+            params.append(expense_id)
+            
+            # Execute update
+            query = f"UPDATE expenses SET {', '.join(updates)} WHERE id = ?"
+            cursor.execute(query, params)
+            
+            if cursor.rowcount > 0:
+                conn.commit()
+                # Fetch and return updated expense
+                cursor.execute('SELECT * FROM expenses WHERE id = ?', (expense_id,))
+                row = cursor.fetchone()
+                return dict(row) if row else None
+            
+            return None
+            
+    except ValidationError as e:
+        logger.error(f"Validation error: {e}")
+        raise
+    except Exception as e:
+        logger.error(f"Error updating expense: {e}")
+        raise
