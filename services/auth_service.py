@@ -48,6 +48,9 @@ def login_user(email: str, password: str) -> dict:
         if not user or not user.check_password(password):
             raise AuthenticationError("Invalid email or password")
         
+        if not user.is_active:
+            raise AuthenticationError("User account is disabled")
+        
         access_token = create_access_token(identity=user.id)
         refresh_token = create_refresh_token(identity=user.id)
         

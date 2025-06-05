@@ -3,6 +3,9 @@ const API_URL = 'http://localhost:5000/api';
 let accessToken = localStorage.getItem('accessToken');
 let refreshToken = localStorage.getItem('refreshToken');
 
+// Define a global variable for development mode
+const isDevelopment = window.ENV === 'development';
+
 // DOM Elements
 const authSection = document.getElementById('auth-section');
 const appSection = document.getElementById('app-section');
@@ -53,7 +56,7 @@ async function login(email, password) {
         
         const data = await response.json();
         // Conditionally log the response data only in development mode
-        if (process.env.NODE_ENV === 'development') {
+        if (isDevelopment) {
             console.log('Login response:', data);
         }
         
