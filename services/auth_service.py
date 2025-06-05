@@ -7,6 +7,10 @@ from utils.validators import ValidationError
 
 logger = logging.getLogger(__name__)
 
+class AuthenticationError(Exception):
+    """Exception raised for authentication failures."""
+    pass
+
 def register_user(username: str, email: str, password: str) -> Dict[str, Any]:
     """Register a new user."""
     try:
@@ -37,25 +41,27 @@ def register_user(username: str, email: str, password: str) -> Dict[str, Any]:
         logger.error(f"Error registering user: {e}")
         raise
 
-def login_user(username: str, password: str) -> Dict[str, Any]:
-    """Login a user."""
+def login_user(email: str, password: str) -> dict:
+    """Login a user and return tokens."""
     try:
-        user = User.query.filter_by(username=username).first()
+        user = User.query.filter_by(email=email).first()
         if not user or not user.check_password(password):
-            raise ValidationError("Invalid username or password")
+            raise AuthenticationError("Invalid email or password")
         
-        if not user.is_active:
-            raise ValidationError("User account is disabled")
-        
-        # Create tokens
         access_token = create_access_token(identity=user.id)
         refresh_token = create_refresh_token(identity=user.id)
         
         return {
-            'user': user.to_dict(),
             'access_token': access_token,
-            'refresh_token': refresh_token
+            'refresh_token': refresh_token,
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email
+            }
         }
+    except AuthenticationError as e:
+        raise
     except Exception as e:
         logger.error(f"Error logging in user: {e}")
         raise

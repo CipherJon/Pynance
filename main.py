@@ -8,7 +8,7 @@ from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 import os
 import logging
 from services.expense_service import add_expense, delete_expense, get_expenses, update_expense
-from services.auth_service import register_user, login_user, get_user_by_id, update_user
+from services.auth_service import register_user, login_user, get_user_by_id, update_user, AuthenticationError
 from utils.validators import ValidationError, validate_date
 from utils.backup import backup_database, restore_from_backup, list_backups
 from config.database import init_db
@@ -31,7 +31,7 @@ app = Flask(__name__, static_folder='frontend')
 # Configure CORS
 CORS(app, resources={
     r"/api/*": {
-        "origins": ["http://localhost:3000", "http://localhost:5000"],
+        "origins": ["http://localhost:3000", "http://localhost:5000", "http://127.0.0.1:5000"],
         "methods": ["GET", "POST", "PUT", "DELETE"],
         "allow_headers": ["Content-Type"]
     }
@@ -51,6 +51,8 @@ jwt = JWTManager(app)
 # Initialize extensions
 init_cache(app)
 init_migrations(app)
+init_db()  # Initialize the database
+
 # Error handlers
 @app.errorhandler(ValidationError)
 def handle_validation_error(error):
@@ -220,9 +222,48 @@ def api_restore_backup(filename):
 def health_check():
     return jsonify({"status": "healthy"}), 200
 
+@app.route('/api/auth/register', methods=['POST'])
+@limiter.limit("5 per minute")  # Rate limit: 5 requests per minute
+def api_register():
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'message': 'No data provided'}), 400
+        
+        required_fields = ['username', 'email', 'password']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({'message': f'Missing required field: {field}'}), 400
+        
+        result = register_user(data['username'], data['email'], data['password'])
+        return jsonify(result), 201
+    except Exception as e:
+        logger.error(f"Registration error: {e}")
+        return jsonify({'message': 'Registration failed'}), 500
+
+@app.route('/api/auth/login', methods=['POST'])
+@limiter.limit("5 per minute")  # Rate limit: 5 requests per minute
+def api_login():
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'message': 'No data provided'}), 400
+        
+        required_fields = ['email', 'password']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({'message': f'Missing required field: {field}'}), 400
+        
+        result = login_user(data['email'], data['password'])
+        return jsonify(result), 200
+    except AuthenticationError as e:
+        return jsonify({'message': str(e)}), 401
+    except ValidationError as e:
+        return jsonify({'message': str(e)}), 400
+    except Exception as e:
+        logger.error(f"Login error: {e}")
+        return jsonify({'message': 'Login failed'}), 500
+
 if __name__ == '__main__':
-    # Initialize database
-    init_db()
-    
     # Start the application
     app.run(debug=True)

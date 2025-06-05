@@ -22,6 +22,11 @@ async function register(username, email, password) {
         });
         
         const data = await response.json();
+        // Sanitize the response data to exclude sensitive fields
+        const sanitizedData = { ...data };
+        delete sanitizedData.access_token;
+        delete sanitizedData.refresh_token;
+        console.log('Register response:', sanitizedData);
         
         if (!response.ok) {
             throw new Error(data.message || 'Registration failed');
@@ -30,22 +35,27 @@ async function register(username, email, password) {
         handleAuthSuccess(data);
         showSuccess('Registration successful!');
     } catch (error) {
+        console.error('Register error:', error);
         showError(error.message);
     } finally {
         hideLoading();
     }
 }
 
-async function login(username, password) {
+async function login(email, password) {
     try {
         showLoading();
         const response = await fetch(`${API_URL}/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify({ email, password })
         });
         
         const data = await response.json();
+        // Conditionally log the response data only in development mode
+        if (process.env.NODE_ENV === 'development') {
+            console.log('Login response:', data);
+        }
         
         if (!response.ok) {
             throw new Error(data.message || 'Login failed');
@@ -54,6 +64,7 @@ async function login(username, password) {
         handleAuthSuccess(data);
         showSuccess('Login successful!');
     } catch (error) {
+        console.error('Login error:', error);
         showError(error.message);
     } finally {
         hideLoading();
@@ -243,9 +254,9 @@ document.getElementById('register').addEventListener('submit', async (e) => {
 
 document.getElementById('login').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const username = document.getElementById('login-username').value;
+    const email = document.getElementById('login-email').value;
     const password = document.getElementById('login-password').value;
-    await login(username, password);
+    await login(email, password);
 });
 
 document.getElementById('expense-form').addEventListener('submit', async (e) => {

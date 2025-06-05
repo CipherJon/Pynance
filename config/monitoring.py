@@ -3,14 +3,15 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# Initialize Prometheus metrics
-metrics = PrometheusMetrics()
+# Initialize Prometheus metrics as None
+metrics = None
 
 def init_monitoring(app):
     """Initialize monitoring with the Flask app."""
+    global metrics
     try:
-        # Initialize metrics
-        metrics.init_app(app)
+        # Initialize metrics with app
+        metrics = PrometheusMetrics(app)
         
         # Add default metrics
         metrics.info('app_info', 'Application info', version='1.0.0')
