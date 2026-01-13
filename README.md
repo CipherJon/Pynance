@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # Merged Project: PyBudget and PyCalculator
 
 ## Overview
@@ -33,7 +33,6 @@ A feature-rich command-line calculator with support for various mathematical ope
   - Graceful handling of keyboard interrupts (Ctrl+C, Ctrl+D)
 - Type hints and documentation
 - Unit tests with pytest
->>>>>>> origin/main
 
 ## Installation
 
@@ -229,4 +228,3 @@ flake8 calculator tests
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
->>>>>>> origin/main
