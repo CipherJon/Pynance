@@ -3,9 +3,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+<<<<<<< HEAD
 # C extensions
 *.so
 
+=======
+>>>>>>> origin/main
 # Distribution / packaging
 .Python
 build/
@@ -40,12 +43,29 @@ htmlcov/
 .tox/
 .nox/
 .coverage
+<<<<<<< HEAD
 *.cover
 *.py,cover
+=======
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+>>>>>>> origin/main
 .hypothesis/
 .pytest_cache/
 cover/
 
+<<<<<<< HEAD
+=======
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+>>>>>>> origin/main
 # Environments
 .env
 .venv
@@ -55,6 +75,7 @@ ENV/
 env.bak/
 venv.bak/
 
+<<<<<<< HEAD
 # IDE specific files
 .idea/
 .vscode/
@@ -99,3 +120,22 @@ pids/
 # Documentation
 docs/
 *.md
+=======
+# Spyder project settings
+.spyderproject
+.spyderworkspace
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Virtual Environment
+venv/
+>>>>>>> origin/main

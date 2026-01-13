@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # requirements.txt
 
 # No external dependencies required for this project.
@@ -6,3 +7,13 @@
 ```
 
 The `README.md` and `requirements.txt` files have been updated to reflect the current project structure and functionality. The `README.md` now includes a detailed project structure and usage examples, while the `requirements.txt` file confirms that there are no external dependencies.
+=======
+# Core dependencies
+setuptools==68.2.2
+
+# Development dependencies
+pytest==8.3.5
+pytest-cov==4.1.0
+flake8==6.1.0
+coverage==7.3.2
+>>>>>>> origin/main
