@@ -1,11 +1,12 @@
 # main.py
 
 """
-Main entry point for the merged pybudget and pyculator project.
+Main entry point for the merged pybudget, pyculator, and pytasker project.
 """
 
 from pybudget import Budget, Expense, generate_report
 from pyculator import Calculator
+from Pytasker.app import app as task_app
 from shared.logging import setup_logging
 
 
@@ -35,6 +36,12 @@ def main():
     print(f"Subtraction: 10 - 5 = {result_subtract}")
     print(f"Multiplication: 10 * 5 = {result_multiply}")
     print(f"Division: 10 / 5 = {result_divide}")
+
+    # Demonstrate Pytasker functionality
+    print("\n=== Pytasker Demo ===")
+    print("Starting Pytasker application...")
+    print("You can access the task manager at http://localhost:5000")
+    print("Run 'flask run' in the Pytasker directory to start the task manager.")
 
 
 if __name__ == "__main__":

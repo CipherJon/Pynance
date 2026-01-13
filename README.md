@@ -1,46 +1,37 @@
-
-# Merged Project: PyBudget and PyCalculator
+# Pynance - Integrated Financial Management System
 
 ## Overview
 
-This project merges two Python applications, `pybudget` and `pyculator`, into a cohesive system. `pybudget` is an expense tracker, and `pyculator` is a calculator. The merged project allows users to manage budgets and perform calculations seamlessly.
+Pynance is an integrated system combining three powerful applications:
+- **PyBudget**: Expense tracker and budget management
+- **PyCalculator**: Advanced calculator with comprehensive mathematical operations
+- **Pytasker**: Task management application with Flask backend
 
 ## Features
 
-- **PyBudget**: Track expenses, manage budgets, and generate reports.
-- **PyCalculator**: Perform basic mathematical operations (addition, subtraction, multiplication, division).
-- **Shared Utilities**: Common utilities and configurations for both modules.
-=======
-# Advanced Calculator
+### PyBudget
+- Track expenses and manage budgets
+- Generate detailed budget reports
+- Categorize expenses for better financial tracking
 
-A feature-rich command-line calculator with support for various mathematical operations, calculation history, and comprehensive error handling.
-
-## Features
-
+### PyCalculator
 - Basic arithmetic operations (addition, subtraction, multiplication, division)
-- Advanced mathematical operations:
-  - Power/exponentiation
-  - Square root
-  - Percentage calculations
-  - Modulo operation
-  - Absolute value
-- Calculation history
-- Clear screen functionality
-- Comprehensive error handling:
-  - Input validation
-  - NaN detection and handling
-  - Division by zero protection
-  - Graceful handling of keyboard interrupts (Ctrl+C, Ctrl+D)
-- Type hints and documentation
-- Unit tests with pytest
+- Advanced mathematical operations (power, square root, percentage, modulo, absolute value)
+- Calculation history and clear screen functionality
+- Comprehensive error handling
+
+### Pytasker
+- Full-stack task management application
+- Flask backend with SQLAlchemy database
+- RESTful API for task management
+- CORS support for frontend-backend communication
 
 ## Installation
 
 1. Clone the repository:
-<<<<<<< HEAD
    ```bash
    git clone <repository-url>
-   cd merged_project
+   cd Pynance
    ```
 
 2. Install the required dependencies:
@@ -50,7 +41,9 @@ A feature-rich command-line calculator with support for various mathematical ope
 
 ## Usage
 
-Run the main application to see both functionalities in action:
+### Running the Main Application
+
+To see all functionalities in action:
 ```bash
 python main.py
 ```
@@ -93,10 +86,39 @@ print(f"Multiplication: 10 * 5 = {result_multiply}")
 print(f"Division: 10 / 5 = {result_divide}")
 ```
 
+### Pytasker Usage
+
+To run the Pytasker task management application:
+
+1. Navigate to the Pytasker directory:
+   ```bash
+   cd Pytasker
+   ```
+
+2. Run the Flask application:
+   ```bash
+   flask run
+   ```
+
+3. Open your browser to http://localhost:5000 to access the task manager
+
+### Unified CLI
+
+Pynance provides a unified CLI to access all components:
+
+```bash
+python pynance.py [budget|calculator|tasker|all]
+```
+
+- `budget`: Run PyBudget demo
+- `calculator`: Run PyCalculator demo
+- `tasker`: Start Pytasker web application
+- `all`: Run all demos
+
 ## Project Structure
 
 ```
-merged_project/
+Pynance/
 │
 ├── pybudget/
 │   ├── __init__.py
@@ -111,6 +133,16 @@ merged_project/
 │   ├── operations.py
 │   └── utils.py
 │
+├── Pytasker/
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── forms.py
+│   │   ├── models.py
+│   │   ├── routes.py
+│   │   └── templates/
+│   ├── config.py
+│   └── manage.py
+│
 ├── shared/
 │   ├── __init__.py
 │   ├── config.py
@@ -123,8 +155,10 @@ merged_project/
 │   └── test_shared/
 │
 ├── main.py
+├── pynance.py
 ├── README.md
-└── requirements.txt
+├── requirements.txt
+└── setup.py
 ```
 
 ## Testing
@@ -137,94 +171,3 @@ python -m pytest tests/
 ## License
 
 This project is licensed under the MIT License.
-```
-
-Now I will update the `requirements.txt` file to reflect any dependencies used in the project. Based on the code, there are no external dependencies, but I will ensure the file is accurate.
-=======
-```bash
-git clone https://github.com/yourusername/calculator.git
-cd calculator
-```
-
-2. Create and activate a virtual environment:
-```bash
-# Windows
-python -m venv venv
-.\venv\Scripts\activate
-
-# Linux/Mac
-python3 -m venv venv
-source venv/bin/activate
-```
-
-3. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-## Usage
-
-Run the calculator:
-```bash
-python -m calculator.main
-```
-
-### Available Operations
-
-1. Add
-2. Subtract
-3. Multiply
-4. Divide
-5. Power
-6. Square Root
-7. Percentage
-8. Modulo
-9. Absolute Value
-
-### Additional Commands
-
-- `h`: Show calculation history
-- `c`: Clear screen
-- `q`: Quit calculator
-
-### Error Handling
-
-The calculator includes comprehensive error handling:
-- Invalid numeric inputs are rejected with clear error messages
-- NaN (Not a Number) values are detected and rejected
-- Division by zero is prevented
-- Keyboard interrupts (Ctrl+C, Ctrl+D) are handled gracefully
-- All operations include proper input validation
-
-## Development
-
-### Running Tests
-
-Run the test suite:
-```bash
-pytest
-```
-
-Run tests with coverage report:
-```bash
-pytest --cov=calculator
-```
-
-### Code Style
-
-The project follows PEP 8 style guidelines. You can check the code style using:
-```bash
-flake8 calculator tests
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
