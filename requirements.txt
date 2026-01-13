@@ -1,23 +1,8 @@
-flask==2.3.3
-flask-cors==4.0.0
-flask-limiter==3.5.0
-flask-caching==2.1.0
-flask-migrate==4.0.5
-flask-jwt-extended==4.5.3
-flask-bcrypt==1.0.1
-pytest==7.4.2
-pytest-cov==4.1.0
-sqlalchemy==2.0.21
-python-dotenv==1.0.0
-python-dateutil==2.8.2
-marshmallow==3.20.1
-gunicorn==21.2.0
-redis==5.0.1
-prometheus-flask-exporter==0.22.4
+# requirements.txt
 
-# Development dependencies
-flake8==6.1.0
-black==23.7.0
-isort==5.12.0
-bandit==1.7.5
-safety==2.3.5
+# No external dependencies required for this project.
+# The project uses Python's built-in modules only.
+# Add any dependencies here if needed in the future.
+```
+
+The `README.md` and `requirements.txt` files have been updated to reflect the current project structure and functionality. The `README.md` now includes a detailed project structure and usage examples, while the `requirements.txt` file confirms that there are no external dependencies.

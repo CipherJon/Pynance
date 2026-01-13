@@ -1,112 +1,117 @@
-# PyBudget - Personal Budget Management System
+# Merged Project: PyBudget and PyCalculator
 
-A Flask-based web application for managing personal expenses and tracking budgets.
+## Overview
+
+This project merges two Python applications, `pybudget` and `pyculator`, into a cohesive system. `pybudget` is an expense tracker, and `pyculator` is a calculator. The merged project allows users to manage budgets and perform calculations seamlessly.
 
 ## Features
 
-- Add, update, and delete expenses
-- Categorize expenses
-- Track spending over time
-- RESTful API endpoints
-- Input validation and error handling
-- Rate limiting and security measures
-- CORS support for frontend integration
-
-## Prerequisites
-
-- Python 3.8 or higher
-- pip (Python package manager)
+- **PyBudget**: Track expenses, manage budgets, and generate reports.
+- **PyCalculator**: Perform basic mathematical operations (addition, subtraction, multiplication, division).
+- **Shared Utilities**: Common utilities and configurations for both modules.
 
 ## Installation
 
 1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/PyBudget.git
-cd PyBudget
-```
+   ```bash
+   git clone <repository-url>
+   cd merged_project
+   ```
 
-2. Create and activate a virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
+2. Install the required dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-3. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
+## Usage
 
-## Running the Application
-
-1. Start the Flask development server:
+Run the main application to see both functionalities in action:
 ```bash
 python main.py
 ```
 
-2. Access the application at `http://localhost:5000`
+### PyBudget Usage
 
-## API Endpoints
+```python
+from pybudget import Budget, Expense, generate_report
 
-### GET /api/expenses
-- Returns a list of all expenses
-- Rate limit: 30 requests per minute
+# Create a budget
+budget = Budget("Monthly Budget", 5000.0)
 
-### POST /api/expenses
-- Creates a new expense
-- Required fields: name, amount
-- Optional fields: category
-- Rate limit: 10 requests per minute
+# Add expenses
+expense1 = Expense("Groceries", 150.0, "Food")
+expense2 = Expense("Rent", 1200.0, "Housing")
+budget.add_expense(expense1)
+budget.add_expense(expense2)
 
-### PUT /api/expenses/<id>
-- Updates an existing expense
-- Optional fields: name, amount, category, date
-- Rate limit: 10 requests per minute
+# Generate a report
+print(generate_report(budget))
+```
 
-### DELETE /api/expenses/<id>
-- Deletes an expense
-- Rate limit: 10 requests per minute
+### PyCalculator Usage
 
-## Testing
+```python
+from pyculator import Calculator
 
-Run the test suite:
-```bash
-pytest
+# Create a calculator instance
+calculator = Calculator()
+
+# Perform operations
+result_add = calculator.add(10, 5)
+result_subtract = calculator.subtract(10, 5)
+result_multiply = calculator.multiply(10, 5)
+result_divide = calculator.divide(10, 5)
+
+print(f"Addition: 10 + 5 = {result_add}")
+print(f"Subtraction: 10 - 5 = {result_subtract}")
+print(f"Multiplication: 10 * 5 = {result_multiply}")
+print(f"Division: 10 / 5 = {result_divide}")
 ```
 
 ## Project Structure
 
 ```
-PyBudget/
-├── config/             # Configuration files
-├── data/              # Database files
-├── frontend/          # Frontend static files
-├── models/            # Data models
-├── services/          # Business logic
-├── tests/             # Test files
-├── utils/             # Utility functions
-├── views/             # View templates
-├── main.py           # Application entry point
-├── requirements.txt   # Project dependencies
-└── README.md         # Project documentation
+merged_project/
+│
+├── pybudget/
+│   ├── __init__.py
+│   ├── budget.py
+│   ├── expense.py
+│   ├── reports.py
+│   └── utils.py
+│
+├── pyculator/
+│   ├── __init__.py
+│   ├── calculator.py
+│   ├── operations.py
+│   └── utils.py
+│
+├── shared/
+│   ├── __init__.py
+│   ├── config.py
+│   ├── logging.py
+│   └── utils.py
+│
+├── tests/
+│   ├── test_pybudget/
+│   ├── test_pyculator/
+│   └── test_shared/
+│
+├── main.py
+├── README.md
+└── requirements.txt
 ```
 
-## Security Features
+## Testing
 
-- Input validation for all user inputs
-- Rate limiting to prevent abuse
-- CORS configuration for frontend security
-- SQL injection prevention through parameterized queries
-- Error handling and logging
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+Run the tests to ensure everything is working correctly:
+```bash
+python -m pytest tests/
+```
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License.
+```
 
+Now I will update the `requirements.txt` file to reflect any dependencies used in the project. Based on the code, there are no external dependencies, but I will ensure the file is accurate.
