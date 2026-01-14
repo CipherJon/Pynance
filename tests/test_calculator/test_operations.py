@@ -10,7 +10,9 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
 import unittest
-from pyculator.operations import add, subtract, multiply, divide
+
+from calculator.operations import add, divide, multiply, subtract
+
 
 class TestOperations(unittest.TestCase):
     """
@@ -55,6 +57,7 @@ class TestOperations(unittest.TestCase):
         """
         with self.assertRaises(ValueError):
             divide(10.0, 0.0)
+
 
 if __name__ == "__main__":
     unittest.main()

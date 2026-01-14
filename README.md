@@ -4,7 +4,7 @@
 
 Pynance is an integrated system combining four powerful applications:
 - **PyBudget**: Expense tracker and budget management
-- **PyCalculator**: Advanced calculator with comprehensive mathematical operations
+- **Calculator**: Advanced calculator with comprehensive mathematical operations
 - **Pytasker**: Task management application with Flask backend
 - **FileOrganizer**: File organization tool with duplicate detection and date-based organization
 
@@ -15,7 +15,7 @@ Pynance is an integrated system combining four powerful applications:
 - Generate detailed budget reports
 - Categorize expenses for better financial tracking
 
-### PyCalculator
+### Calculator
 - Basic arithmetic operations (addition, subtraction, multiplication, division)
 - Advanced mathematical operations (power, square root, percentage, modulo, absolute value)
 - Calculation history and clear screen functionality
@@ -81,10 +81,10 @@ budget.add_expense(expense2)
 print(generate_report(budget))
 ```
 
-### PyCalculator Usage
+### Calculator Usage
 
 ```python
-from pyculator import Calculator
+from calculator.calculator import Calculator
 
 # Create a calculator instance
 calculator = Calculator()
@@ -136,7 +136,7 @@ python pynance.py [budget|calculator|tasker|all]
 ```
 
 - `budget`: Run PyBudget demo
-- `calculator`: Run PyCalculator demo
+- `calculator`: Run Calculator demo
 - `tasker`: Start Pytasker web application
 - `organizer`: Run File Organizer
 - `all`: Run all demos
@@ -153,7 +153,7 @@ Pynance/
 │   ├── reports.py
 │   └── utils.py
 │
-├── pyculator/
+├── calculator/
 │   ├── __init__.py
 │   ├── calculator.py
 │   ├── operations.py
@@ -185,7 +185,7 @@ Pynance/
 │
 ├── tests/
 │   ├── test_pybudget/
-│   ├── test_pyculator/
+│   ├── test_calculator/
 │   └── test_shared/
 │
 ├── main.py

@@ -1,21 +1,16 @@
-# pyculator/calculator.py
-
 """
-Calculator module for performing mathematical operations.
+Calculator class for performing arithmetic operations and maintaining history.
 """
 
 
 class Calculator:
     """
-    A class to represent a calculator.
-
-    Attributes:
-        history (list): A list of operations performed by the calculator.
+    A class to perform arithmetic operations and maintain a history of operations.
     """
 
     def __init__(self):
         """
-        Initialize a Calculator instance.
+        Initialize the Calculator with an empty history.
         """
         self.history = []
 
@@ -24,11 +19,11 @@ class Calculator:
         Add two numbers and record the operation in history.
 
         Args:
-            a (float): The first number.
-            b (float): The second number.
+            a (float): First number
+            b (float): Second number
 
         Returns:
-            float: The result of the addition.
+            float: Sum of a and b
         """
         result = a + b
         self.history.append(f"Added {a} and {b} to get {result}")
@@ -36,14 +31,14 @@ class Calculator:
 
     def subtract(self, a: float, b: float) -> float:
         """
-        Subtract two numbers and record the operation in history.
+        Subtract the second number from the first and record the operation in history.
 
         Args:
-            a (float): The first number.
-            b (float): The second number.
+            a (float): First number
+            b (float): Second number
 
         Returns:
-            float: The result of the subtraction.
+            float: Difference between a and b
         """
         result = a - b
         self.history.append(f"Subtracted {b} from {a} to get {result}")
@@ -54,11 +49,11 @@ class Calculator:
         Multiply two numbers and record the operation in history.
 
         Args:
-            a (float): The first number.
-            b (float): The second number.
+            a (float): First number
+            b (float): Second number
 
         Returns:
-            float: The result of the multiplication.
+            float: Product of a and b
         """
         result = a * b
         self.history.append(f"Multiplied {a} and {b} to get {result}")
@@ -66,17 +61,17 @@ class Calculator:
 
     def divide(self, a: float, b: float) -> float:
         """
-        Divide two numbers and record the operation in history.
+        Divide the first number by the second and record the operation in history.
 
         Args:
-            a (float): The first number.
-            b (float): The second number.
+            a (float): First number
+            b (float): Second number
 
         Returns:
-            float: The result of the division.
+            float: Quotient of a and b
 
         Raises:
-            ValueError: If the divisor is zero.
+            ValueError: If b is zero
         """
         if b == 0:
             raise ValueError("Cannot divide by zero")
@@ -86,9 +81,9 @@ class Calculator:
 
     def get_history(self) -> list:
         """
-        Retrieve the history of operations performed by the calculator.
+        Retrieve the operation history.
 
         Returns:
-            list: A list of operation history strings.
+            list: List of operation history strings
         """
         return self.history

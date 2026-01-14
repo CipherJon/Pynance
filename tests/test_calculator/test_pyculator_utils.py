@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../.
 
 import unittest
 
-from pyculator.utils import format_number, validate_number
+from calculator.utils import format_number, validate_number
 
 
 class TestUtils(unittest.TestCase):
