@@ -1,7 +1,11 @@
 [tool.pytest.ini_options]
 pythonpath = [
   ".",
-  "file_organizer"
+  "file_organizer",
+  "pybot"
+]
+testpaths = [
+  "tests",
 ]
 
 [build-system]

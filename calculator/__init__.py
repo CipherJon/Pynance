@@ -1,1 +1,3 @@
-# This file can be left empty or used to initialize the package
+from .calculator import Calculator
+
+__all__ = ["Calculator"]

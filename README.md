@@ -2,11 +2,12 @@
 
 ## Overview
 
-Pynance is an integrated system combining four powerful applications:
+Pynance is an integrated system combining five powerful applications:
 - **PyBudget**: Expense tracker and budget management
 - **Calculator**: Advanced calculator with comprehensive mathematical operations
 - **Pytasker**: Task management application with Flask backend
 - **FileOrganizer**: File organization tool with duplicate detection and date-based organization
+- **PyBot**: Chatbot for financial assistance and general queries
 
 ## Features
 
@@ -20,6 +21,13 @@ Pynance is an integrated system combining four powerful applications:
 - Advanced mathematical operations (power, square root, percentage, modulo, absolute value)
 - Calculation history and clear screen functionality
 - Comprehensive error handling
+
+### PyBot
+- Chatbot for financial assistance and general queries
+- Natural language processing for intent recognition
+- User authentication and session management
+- Web-based interface for interaction
+- Integration with other Pynance modules for unified assistance
 
 ### FileOrganizer
 - Organize files into categories based on file extensions
@@ -127,17 +135,34 @@ To run the Pytasker task management application:
 
 3. Open your browser to http://localhost:5000 to access the task manager
 
+### PyBot Usage
+
+To run the PyBot chatbot application:
+
+1. Navigate to the Pynance directory:
+   ```bash
+   cd Pynance
+   ```
+
+2. Run the PyBot application:
+   ```bash
+   python pynance.py chatbot
+   ```
+
+3. Open your browser to http://localhost:5000 to access the chatbot
+
 ### Unified CLI
 
 Pynance provides a unified CLI to access all components:
 
 ```bash
-python pynance.py [budget|calculator|tasker|all]
+python pynance.py [budget|calculator|tasker|chatbot|all]
 ```
 
 - `budget`: Run PyBudget demo
-- `calculator`: Run Calculator demo
+- `calculator`: Run PyCalculator demo
 - `tasker`: Start Pytasker web application
+- `chatbot`: Start PyBot web application
 - `organizer`: Run File Organizer
 - `all`: Run all demos
 
@@ -176,6 +201,32 @@ Pynance/
 │   │   └── templates/
 │   ├── config.py
 │   └── manage.py
+├── pybot/
+│   ├── __init__.py
+│   ├── bot/
+│   │   ├── __init__.py
+│   │   ├── chatbot.py
+│   │   ├── core/
+│   │   │   ├── __init__.py
+│   │   │   ├── extensions.py
+│   │   │   ├── preprocessing.py
+│   │   │   └── models/
+│   │   │       └── svc_model.py
+│   ├── config/
+│   │   ├── __init__.py
+│   │   ├── models.py
+│   │   └── settings.py
+│   ├── data/
+│   │   └── intents.json
+│   ├── static/
+│   │   ├── css/
+│   │   │   └── style.css
+│   │   └── js/
+│   │       └── chatbot.js
+│   └── templates/
+│       ├── index.html
+│       ├── login.html
+│       └── register.html
 │
 ├── shared/
 │   ├── __init__.py

@@ -1,12 +1,14 @@
 # main.py
 
 """
-Main entry point for the merged pybudget, pyculator, pytasker, and file_organizer project.
+Main entry point for the merged pybudget, pyculator, pytasker, file_organizer, and pybot project.
 """
 
-from file_organizer.file_organizer.main import main as organizer_main
-from pybudget import Budget, Expense, generate_report
 from pyculator import Calculator
+
+from file_organizer.file_organizer.main import main as organizer_main
+from pybot import app as chatbot_app
+from pybudget import Budget, Expense, generate_report
 from Pytasker.app import app as task_app
 from shared.logging import setup_logging
 
@@ -43,6 +45,11 @@ def main():
     print("Starting Pytasker application...")
     print("You can access the task manager at http://localhost:5000")
     print("Run 'flask run' in the Pytasker directory to start the task manager.")
+
+    print("\n=== PyBot Demo ===")
+    print("Starting PyBot application...")
+    print("You can access the chatbot at http://localhost:5000")
+    print("Run 'python pynance.py chatbot' to start the chatbot.")
 
     print("\n=== File Organizer Demo ===")
     print("Running file organizer demo...")

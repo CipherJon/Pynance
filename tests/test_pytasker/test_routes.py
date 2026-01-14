@@ -20,11 +20,8 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "Pytasker"))
 )
 
-import sys
-
-sys.path.insert(0, "/media/cipherjon/HDD/Repo/Pynance/Pytasker")
-from app import app, db
-from app.models import Task
+from Pytasker.app import app, db
+from Pytasker.app.models import Task
 
 
 @pytest.fixture

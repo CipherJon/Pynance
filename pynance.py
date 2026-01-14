@@ -8,6 +8,7 @@ This script provides a command-line interface to access all components of Pynanc
 - PyCalculator: Advanced calculator functionality
 - Pytasker: Task management system
 - FileOrganizer: File organization tool
+- PyBot: Chatbot for financial assistance
 """
 
 import argparse
@@ -138,6 +139,32 @@ def run_tasker():
         sys.exit(0)
 
 
+def run_chatbot():
+    """Start the PyBot Flask application."""
+    print("\n=== Starting PyBot ===")
+    print("Starting Flask application...")
+    print("Access the chatbot at http://localhost:5000")
+    print("Press Ctrl+C to stop the server")
+
+    # Change to PyBot directory
+    pybot_dir = Path(__file__).parent / "pybot"
+    os.chdir(pybot_dir)
+
+    # Set Flask environment variables
+    os.environ["FLASK_APP"] = "__init__.py"
+    os.environ["FLASK_ENV"] = "development"
+
+    # Run Flask application
+    try:
+        subprocess.run(["flask", "run"], check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error running PyBot: {e}")
+        sys.exit(1)
+    except KeyboardInterrupt:
+        print("\nPyBot stopped by user")
+        sys.exit(0)
+
+
 def main():
     """Main entry point for Pynance CLI."""
     parser = argparse.ArgumentParser(
@@ -179,6 +206,7 @@ Examples:
     subparsers.add_parser("budget", help="Run PyBudget demo")
     subparsers.add_parser("calculator", help="Run PyCalculator demo")
     subparsers.add_parser("tasker", help="Start Pytasker web application")
+    subparsers.add_parser("chatbot", help="Start PyBot web application")
     subparsers.add_parser("all", help="Run all demos")
 
     args = parser.parse_args()
@@ -189,6 +217,8 @@ Examples:
         run_calculator_demo()
     elif args.command == "tasker":
         run_tasker()
+    elif args.command == "chatbot":
+        run_chatbot()
     elif args.command == "organizer":
         # Call organizer with its specific arguments
         run_organizer_with_args(args)
@@ -196,6 +226,7 @@ Examples:
         run_budget_demo()
         run_calculator_demo()
         print("\nTo run Pytasker, use: python pynance.py tasker")
+        print("To run PyBot, use: python pynance.py chatbot")
         print("To run File Organizer, use: python pynance.py organizer")
 
 
