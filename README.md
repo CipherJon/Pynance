@@ -2,10 +2,11 @@
 
 ## Overview
 
-Pynance is an integrated system combining three powerful applications:
+Pynance is an integrated system combining four powerful applications:
 - **PyBudget**: Expense tracker and budget management
 - **PyCalculator**: Advanced calculator with comprehensive mathematical operations
 - **Pytasker**: Task management application with Flask backend
+- **FileOrganizer**: File organization tool with duplicate detection and date-based organization
 
 ## Features
 
@@ -19,6 +20,15 @@ Pynance is an integrated system combining three powerful applications:
 - Advanced mathematical operations (power, square root, percentage, modulo, absolute value)
 - Calculation history and clear screen functionality
 - Comprehensive error handling
+
+### FileOrganizer
+- Organize files into categories based on file extensions
+- Date-based organization (monthly/quarterly)
+- Duplicate file detection and handling
+- Parallel processing for better performance
+- Comprehensive logging
+- Safe file operations with backup support
+- Command-line interface with various options
 
 ### Pytasker
 - Full-stack task management application
@@ -46,6 +56,11 @@ Pynance is an integrated system combining three powerful applications:
 To see all functionalities in action:
 ```bash
 python main.py
+```
+
+To run the file organizer:
+```bash
+python pynance.py organizer
 ```
 
 ### PyBudget Usage
@@ -86,6 +101,16 @@ print(f"Multiplication: 10 * 5 = {result_multiply}")
 print(f"Division: 10 / 5 = {result_divide}")
 ```
 
+### FileOrganizer Usage
+
+```bash
+# Run the file organizer
+python pynance.py organizer
+
+# With options:
+python pynance.py organizer --directory /path/to/directory --workers 8 --verbose
+```
+
 ### Pytasker Usage
 
 To run the Pytasker task management application:
@@ -113,6 +138,7 @@ python pynance.py [budget|calculator|tasker|all]
 - `budget`: Run PyBudget demo
 - `calculator`: Run PyCalculator demo
 - `tasker`: Start Pytasker web application
+- `organizer`: Run File Organizer
 - `all`: Run all demos
 
 ## Project Structure
@@ -132,7 +158,15 @@ Pynance/
 │   ├── calculator.py
 │   ├── operations.py
 │   └── utils.py
-│
+├── file_organizer/
+│   ├── file_organizer/
+│   │   ├── __init__.py
+│   │   ├── config.py
+│   │   ├── main.py
+│   │   ├── organizer.py
+│   │   └── utils.py
+│   ├── scripts/
+│   └── tests/
 ├── Pytasker/
 │   ├── app/
 │   │   ├── __init__.py

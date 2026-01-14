@@ -1,9 +1,10 @@
 # main.py
 
 """
-Main entry point for the merged pybudget, pyculator, and pytasker project.
+Main entry point for the merged pybudget, pyculator, pytasker, and file_organizer project.
 """
 
+from file_organizer.file_organizer.main import main as organizer_main
 from pybudget import Budget, Expense, generate_report
 from pyculator import Calculator
 from Pytasker.app import app as task_app
@@ -42,6 +43,11 @@ def main():
     print("Starting Pytasker application...")
     print("You can access the task manager at http://localhost:5000")
     print("Run 'flask run' in the Pytasker directory to start the task manager.")
+
+    print("\n=== File Organizer Demo ===")
+    print("Running file organizer demo...")
+    print("This would organize files in the default directory (~/Downloads)")
+    print("To run the actual organizer, use: python pynance.py organizer")
 
 
 if __name__ == "__main__":

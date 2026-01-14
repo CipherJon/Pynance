@@ -7,6 +7,7 @@ This script provides a command-line interface to access all components of Pynanc
 - PyBudget: Expense tracking and budget management
 - PyCalculator: Advanced calculator functionality
 - Pytasker: Task management system
+- FileOrganizer: File organization tool
 """
 
 import argparse
@@ -27,6 +28,43 @@ def run_budget_demo():
     budget.add_expense(expense1)
     budget.add_expense(expense2)
     print(generate_report(budget))
+
+
+def run_organizer_with_args(args):
+    """Run the File Organizer with specific arguments."""
+    print("\n=== File Organizer ===")
+
+    import logging
+    import sys
+
+    from file_organizer.file_organizer.config import LOG_CONFIG
+    from file_organizer.file_organizer.organizer import organize_files
+
+    # Set up logging based on verbose flag
+    level = logging.DEBUG if args.verbose else getattr(logging, LOG_CONFIG["level"])
+    logging.basicConfig(
+        level=level,
+        format=LOG_CONFIG["format"],
+        handlers=[
+            logging.FileHandler(LOG_CONFIG["file"]),
+            logging.StreamHandler(sys.stdout),
+        ],
+    )
+
+    # Call organize_files with the specified arguments
+    base_dir = args.directory if args.directory else None
+    results = organize_files(base_dir, args.workers)
+
+    # Print results
+    if results["success"]:
+        print("\nSuccessfully processed files:")
+        for msg in results["success"]:
+            print(f"✓ {msg}")
+
+    if results["failed"]:
+        print("\nFailed to process files:")
+        for msg in results["failed"]:
+            print(f"✗ {msg}")
 
 
 def run_calculator_demo():
@@ -82,15 +120,38 @@ Examples:
   python pynance.py budget       - Run PyBudget demo
   python pynance.py calculator   - Run PyCalculator demo
   python pynance.py tasker       - Start Pytasker web application
+  python pynance.py organizer    - Run File Organizer
   python pynance.py all          - Run all demos
         """,
     )
 
-    parser.add_argument(
-        "command",
-        choices=["budget", "calculator", "tasker", "all"],
-        help="Component to run",
+    # Create subparsers for commands that need their own arguments
+    subparsers = parser.add_subparsers(dest="command", help="Component to run")
+
+    # Organizer subparser
+    organizer_parser = subparsers.add_parser("organizer", help="Run File Organizer")
+    organizer_parser.add_argument(
+        "--directory",
+        "-d",
+        type=str,
+        help="Directory to organize (default: ~/Downloads)",
     )
+    organizer_parser.add_argument(
+        "--workers",
+        "-w",
+        type=int,
+        default=4,
+        help="Number of worker threads (default: 4)",
+    )
+    organizer_parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Enable verbose logging"
+    )
+
+    # Other commands don't need additional arguments
+    subparsers.add_parser("budget", help="Run PyBudget demo")
+    subparsers.add_parser("calculator", help="Run PyCalculator demo")
+    subparsers.add_parser("tasker", help="Start Pytasker web application")
+    subparsers.add_parser("all", help="Run all demos")
 
     args = parser.parse_args()
 
@@ -100,10 +161,14 @@ Examples:
         run_calculator_demo()
     elif args.command == "tasker":
         run_tasker()
+    elif args.command == "organizer":
+        # Call organizer with its specific arguments
+        run_organizer_with_args(args)
     elif args.command == "all":
         run_budget_demo()
         run_calculator_demo()
         print("\nTo run Pytasker, use: python pynance.py tasker")
+        print("To run File Organizer, use: python pynance.py organizer")
 
 
 if __name__ == "__main__":

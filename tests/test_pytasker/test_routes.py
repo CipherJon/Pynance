@@ -1,3 +1,14 @@
+"""
+Test suite for Pytasker routes.
+
+To run these tests:
+1. Make sure you're in the repository root directory
+2. Run: pytest tests/test_pytasker/ -v
+3. Or run all tests: pytest
+
+Note: The .env file in Pytasker/ provides the SECRET_KEY for testing.
+"""
+
 import os
 import sys
 from unittest.mock import patch
