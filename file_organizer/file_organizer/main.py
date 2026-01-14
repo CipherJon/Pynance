@@ -11,11 +11,33 @@ from .organizer import organize_files
 def setup_logging(verbose: bool = False) -> None:
     """Set up logging configuration."""
     level = logging.DEBUG if verbose else getattr(logging, LOG_CONFIG["level"])
+
+    # Ensure the log file directory exists and is writable
+    log_file_path = Path(LOG_CONFIG["file"])
+    if not log_file_path.parent.exists():
+        try:
+            log_file_path.parent.mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+            print(
+                f"WARNING: Could not create log directory: {e}. Falling back to default location."
+            )
+            log_file_path = Path.home() / "file_organizer.log"
+
+    # Check if the log file is writable
+    try:
+        with open(log_file_path, "a") as f:
+            pass
+    except Exception as e:
+        print(
+            f"WARNING: Could not write to log file: {e}. Falling back to default location."
+        )
+        log_file_path = Path.home() / "file_organizer.log"
+
     logging.basicConfig(
         level=level,
         format=LOG_CONFIG["format"],
         handlers=[
-            logging.FileHandler(LOG_CONFIG["file"]),
+            logging.FileHandler(log_file_path),
             logging.StreamHandler(sys.stdout),
         ],
     )

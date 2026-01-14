@@ -76,6 +76,58 @@ class TestMain(unittest.TestCase):
         logger = logging.getLogger()
         self.assertTrue(len(logger.handlers) > 0)
 
+    def test_setup_logging_invalid_path(self):
+        """Test logging setup with an invalid log file path."""
+        # Mock an invalid log file path
+        with patch(
+            "file_organizer.main.LOG_CONFIG",
+            {
+                "level": "INFO",
+                "format": "%(message)s",
+                "file": "/invalid/path/file_organizer.log",
+            },
+        ):
+            with patch("builtins.print") as mock_print:
+                setup_logging(verbose=False)
+
+                # Verify a warning was printed
+                self.assertTrue(
+                    any(
+                        "WARNING: Could not create log directory" in str(call)
+                        for call in mock_print.call_args_list
+                    )
+                )
+
+    def test_setup_logging_unwritable_directory(self):
+        """Test logging setup with an unwritable directory."""
+        # Create a directory and make it unwritable
+        unwritable_dir = tempfile.mkdtemp()
+        os.chmod(unwritable_dir, 0o000)
+
+        # Mock an unwritable log file path
+        with patch(
+            "file_organizer.main.LOG_CONFIG",
+            {
+                "level": "INFO",
+                "format": "%(message)s",
+                "file": os.path.join(unwritable_dir, "file_organizer.log"),
+            },
+        ):
+            with patch("builtins.print") as mock_print:
+                setup_logging(verbose=False)
+
+                # Verify a warning was printed
+                self.assertTrue(
+                    any(
+                        "WARNING: Could not write to log file" in str(call)
+                        for call in mock_print.call_args_list
+                    )
+                )
+
+        # Clean up
+        os.chmod(unwritable_dir, 0o755)
+        os.rmdir(unwritable_dir)
+
     @patch("file_organizer.main.organize_files")
     def test_main_success(self, mock_organize):
         """Test main function with successful execution."""

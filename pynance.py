@@ -36,9 +36,37 @@ def run_organizer_with_args(args):
 
     import logging
     import sys
+    from pathlib import Path
 
     from file_organizer.file_organizer.config import LOG_CONFIG
     from file_organizer.file_organizer.organizer import organize_files
+
+    # Validate LOG_CONFIG dictionary
+    required_keys = ["level", "format", "file"]
+    for key in required_keys:
+        if key not in LOG_CONFIG:
+            raise ValueError(f"LOG_CONFIG is missing required key: {key}")
+
+    # Ensure the log file directory exists and is writable
+    log_file_path = Path(LOG_CONFIG["file"])
+    if not log_file_path.parent.exists():
+        try:
+            log_file_path.parent.mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+            print(
+                f"WARNING: Could not create log directory: {e}. Falling back to default location."
+            )
+            log_file_path = Path.home() / "file_organizer.log"
+
+    # Check if the log file is writable
+    try:
+        with open(log_file_path, "a") as f:
+            pass
+    except Exception as e:
+        print(
+            f"WARNING: Could not write to log file: {e}. Falling back to default location."
+        )
+        log_file_path = Path.home() / "file_organizer.log"
 
     # Set up logging based on verbose flag
     level = logging.DEBUG if args.verbose else getattr(logging, LOG_CONFIG["level"])
@@ -46,7 +74,7 @@ def run_organizer_with_args(args):
         level=level,
         format=LOG_CONFIG["format"],
         handlers=[
-            logging.FileHandler(LOG_CONFIG["file"]),
+            logging.FileHandler(log_file_path),
             logging.StreamHandler(sys.stdout),
         ],
     )
