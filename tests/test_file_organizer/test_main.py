@@ -76,9 +76,8 @@ class TestMain(unittest.TestCase):
         logger = logging.getLogger()
         self.assertTrue(len(logger.handlers) > 0)
 
-    @patch("file_organizer.file_organizer.organizer.organize_files")
-    @patch("sys.exit")
-    def test_main_success(self, mock_exit, mock_organize):
+    @patch("file_organizer.main.organize_files")
+    def test_main_success(self, mock_organize):
         """Test main function with successful execution."""
         # Mock organize_files to return success
         mock_organize.return_value = {
@@ -92,12 +91,11 @@ class TestMain(unittest.TestCase):
             # Verify organize_files was called
             mock_organize.assert_called_once()
 
-            # Verify exit code
-            mock_exit.assert_called_with(0)
+            # Verify return value
+            self.assertEqual(result, 0)
 
-    @patch("file_organizer.file_organizer.organizer.organize_files")
-    @patch("sys.exit")
-    def test_main_failure(self, mock_exit, mock_organize):
+    @patch("file_organizer.main.organize_files")
+    def test_main_failure(self, mock_organize):
         """Test main function with failed execution."""
         # Mock organize_files to raise an exception
         mock_organize.side_effect = Exception("Test error")
@@ -105,12 +103,11 @@ class TestMain(unittest.TestCase):
         with patch("sys.argv", ["main.py"]):
             result = main()
 
-            # Verify exit code for failure
-            mock_exit.assert_called_with(1)
+            # Verify return value for failure
+            self.assertEqual(result, 1)
 
-    @patch("file_organizer.file_organizer.organizer.organize_files")
-    @patch("sys.exit")
-    def test_main_with_results(self, mock_exit, mock_organize):
+    @patch("file_organizer.main.organize_files")
+    def test_main_with_results(self, mock_organize):
         """Test main function with mixed results."""
         # Mock organize_files to return mixed results
         mock_organize.return_value = {

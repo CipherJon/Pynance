@@ -198,14 +198,21 @@ class TestFileOrganizer(unittest.TestCase):
         elif DUPLICATE_HANDLING.handle_duplicates == "delete":
             self.assertFalse(duplicate_file.exists())
 
-    @patch("file_organizer.file_organizer.organizer.ThreadPoolExecutor")
-    def test_parallel_processing(self, mock_executor):
+    @patch("file_organizer.organizer.ThreadPoolExecutor")
+    @patch("file_organizer.organizer.as_completed")
+    def test_parallel_processing(self, mock_as_completed, mock_executor):
         """Test parallel processing with ThreadPoolExecutor."""
         mock_future = MagicMock()
         mock_future.result.return_value = (True, "Test message")
-        mock_executor.return_value.__enter__.return_value.submit.return_value = (
-            mock_future
-        )
+
+        # Create a mock context manager for ThreadPoolExecutor
+        mock_context = MagicMock()
+        mock_context.__enter__.return_value.submit.return_value = mock_future
+        mock_context.__exit__.return_value = None
+        mock_executor.return_value = mock_context
+
+        # Mock as_completed to return an iterator of futures
+        mock_as_completed.return_value = [mock_future]
 
         organizer = FileOrganizer(Path(self.test_dir))
 
@@ -296,9 +303,8 @@ class TestMain(unittest.TestCase):
         logger = logging.getLogger()
         self.assertTrue(len(logger.handlers) > 0)
 
-    @patch("file_organizer.file_organizer.main.organize_files")
-    @patch("sys.exit")
-    def test_main_success(self, mock_exit, mock_organize):
+    @patch("file_organizer.main.organize_files")
+    def test_main_success(self, mock_organize):
         """Test main function with successful execution."""
         # Mock organize_files to return success
         mock_organize.return_value = {
@@ -312,12 +318,11 @@ class TestMain(unittest.TestCase):
             # Verify organize_files was called
             mock_organize.assert_called_once()
 
-            # Verify exit code
-            mock_exit.assert_called_with(0)
+            # Verify return value
+            self.assertEqual(result, 0)
 
-    @patch("file_organizer.file_organizer.main.organize_files")
-    @patch("sys.exit")
-    def test_main_failure(self, mock_exit, mock_organize):
+    @patch("file_organizer.main.organize_files")
+    def test_main_failure(self, mock_organize):
         """Test main function with failed execution."""
         # Mock organize_files to raise an exception
         mock_organize.side_effect = Exception("Test error")
@@ -325,12 +330,11 @@ class TestMain(unittest.TestCase):
         with patch("sys.argv", ["main.py"]):
             result = main()
 
-            # Verify exit code for failure
-            mock_exit.assert_called_with(1)
+            # Verify return value for failure
+            self.assertEqual(result, 1)
 
-    @patch("file_organizer.file_organizer.main.organize_files")
-    @patch("sys.exit")
-    def test_main_with_results(self, mock_exit, mock_organize):
+    @patch("file_organizer.main.organize_files")
+    def test_main_with_results(self, mock_organize):
         """Test main function with mixed results."""
         # Mock organize_files to return mixed results
         mock_organize.return_value = {
